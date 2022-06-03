@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'paymentpage.dart';
+import 'mappage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,8 +14,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Zona Azul',
+      home: MyHomePage(title: 'Zona Azul'),
     );
   }
 }
@@ -28,14 +31,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  late GoogleMapController mapController;
+
+  final LatLng _center = const LatLng(-22.832916, -47.053429);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color.fromARGB(255, 44, 83, 100), Color.fromARGB(255, 32, 58, 67), Color.fromARGB(255, 15, 32, 39)])),
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color.fromARGB(255, 44, 83, 100), Color.fromARGB(255, 32, 58, 67), Color.fromARGB(255, 15, 32, 39)])),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(
@@ -77,33 +88,61 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
                 child:
                 Container(
-                  width: 325,
-                  height: 400,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: Colors.white,
-                  ),
+                    width: 325,
+                    height: 400,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.white,
+                    ),
+                    child: ClipRRect(
+                        clipBehavior: Clip.hardEdge,
+                        child: OverflowBox(
+                            child: Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30)
+                                ),
+                                child: GoogleMap(
+                                  onMapCreated: _onMapCreated,
+                                  myLocationButtonEnabled: false,
+                                  initialCameraPosition: CameraPosition(
+                                    target: _center,
+                                    zoom: 18.0,
+                                  ),
+                                ),
+                              ),
+                            )
+                        )
+                    )
                 ),
               ),
               Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
-                  child:
-                  GradientButton(
-                    width: 200,
-                    onPressed: () {},
-                    borderRadius: BorderRadius.circular(30),
-                    child: const Text(
-                      'CONSULTAR MAPA',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
+                child:
+                GradientButton(
+                  width: 200,
+                  onPressed: () {
+                    Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => MapPage())
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(30),
+                  child: const Text(
+                    'CONSULTAR MAPA',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
+              ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
                 child:
                 GradientButtonIcon(
                   width: 200,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => PaymentPage())
+                    );
+                  },
                   borderRadius: BorderRadius.circular(30),
                   label: const Text(
                     'COMPRAR TICKET',

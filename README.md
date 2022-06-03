@@ -1,8 +1,6 @@
-# projeto_intiii
+# projetoint_all
 
 Projeto Integrador 3
-
-Modulo Cidadao
 
 ## Getting Started
 
