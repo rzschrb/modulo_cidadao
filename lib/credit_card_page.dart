@@ -1,36 +1,44 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:projetoint_all/paymentpage.dart';
 import 'package:projetoint_all/widget/button_widget.dart';
+import 'firebase_options.dart';
+import 'variables.dart' as globalVars;
 
+Future <void>Payment() async{
 
-class CreditCardPage extends StatelessWidget {
-  const CreditCardPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Zona Azul Pagamento',
-      home: CreditCardHome(),
-    );
-  }
-}
-
-class CreditCardHome extends StatefulWidget {
-  const CreditCardHome({Key? key}) : super(key: key);
-
-
-  @override
-  _CreditCardPageState createState() => _CreditCardPageState();
-}
-
-class _CreditCardPageState extends State<CreditCardHome> {
   String cardNumber = '';
   String expiryDate= '';
   String nomeCartao = '';
   String cvvCode= '';
+  String placa = globalVars.placa;
+  String doc = globalVars.doc;
   bool isCvvFocused = false;
+
+  var data = {
+    "holder": nomeCartao.toUpperCase(),
+    "validade": expiryDate,
+    "numeroCartao": cardNumber,
+    "cvv": cvvCode,
+    "cpf": doc,
+    "placa": placa,
+  };
+
+  final result = await FirebaseFunctions
+      .instanceFor(region: "southamerica-east1")
+      .httpsCallable('payment')
+      .call(data);
+  setState(() {
+    _result = result.data["message"];
+
+    if(_result == "Sucesso"){
+      Navigator.push(context,
+        MaterialPageRoute(builder: builder)
+      )
+    }
+  });
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -96,6 +104,8 @@ class _CreditCardPageState extends State<CreditCardHome> {
                           width: 200,
                           onPressed: () {
                             if(formKey.currentState!.validate()){
+                              print(doc);
+                              print(placa);
                               print('valido');
                             }
                             else{
@@ -128,3 +138,4 @@ class _CreditCardPageState extends State<CreditCardHome> {
     });
   }
 }
+

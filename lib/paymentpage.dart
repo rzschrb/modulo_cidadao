@@ -4,6 +4,7 @@ import 'credit_card_page.dart';
 import 'gerar_qr_code.dart';
 import 'main.dart';
 import 'widget/button_widget.dart';
+import 'variables.dart' as globalVars;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -101,6 +102,9 @@ class _PaymentHomeState extends State<PaymentHome> {
                   final isValid = formKey.currentState!.validate();
                   if (isValid) {
                     formKey.currentState!.save();
+
+                    globalVars.placa = placa;
+                    globalVars.doc = doc;
 
                     final message = 'placa: $placa\ndoc: $doc';
                     final snackBar = SnackBar(
