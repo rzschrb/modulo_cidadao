@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'paymentpage.dart';
 import 'mappage.dart';
@@ -31,12 +32,32 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  late LocationData _currentPosition;
+  late String _address,_dateTime;
+  late Marker marker;
+  Location location = Location();
+
   late GoogleMapController mapController;
 
-  final LatLng _center = const LatLng(-22.832916, -47.053429);
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getLoc();
+  }
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  late LatLng _initialcameraposition = const LatLng(-22.832916, -47.053429);
+
+  void _onMapCreated(GoogleMapController _cntlr)
+  {
+    mapController = mapController;
+    location.onLocationChanged.listen((l) {
+      mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: LatLng(l.latitude!, l.longitude!),zoom: 15),
+        ),
+      );
+    });
   }
 
   @override
@@ -103,10 +124,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                     borderRadius: BorderRadius.circular(30)
                                 ),
                                 child: GoogleMap(
+                                  zoomGesturesEnabled: false,
+                                  scrollGesturesEnabled: false,
+                                  tiltGesturesEnabled: false,
+                                  rotateGesturesEnabled: false,
+                                  zoomControlsEnabled: false,
                                   onMapCreated: _onMapCreated,
-                                  myLocationButtonEnabled: false,
+                                  myLocationButtonEnabled: true,
+                                  myLocationEnabled: true,
                                   initialCameraPosition: CameraPosition(
-                                    target: _center,
+                                    target: _initialcameraposition,
                                     zoom: 18.0,
                                   ),
                                 ),
@@ -156,6 +183,38 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  getLoc() async{
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _currentPosition = await location.getLocation();
+    _initialcameraposition = LatLng(_currentPosition.latitude!,_currentPosition.longitude!);
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      print("${currentLocation.longitude} : ${currentLocation.longitude}");
+      setState(() {
+        _currentPosition = currentLocation;
+        _initialcameraposition = LatLng(_currentPosition.latitude!,_currentPosition.longitude!);
+      });
+    });
+  }
+
 }
 
 class GradientButton extends StatelessWidget {
@@ -239,4 +298,5 @@ class GradientButtonIcon extends StatelessWidget {
       ),
     );
   }
+
 }
