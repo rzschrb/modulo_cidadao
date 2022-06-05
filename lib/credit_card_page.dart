@@ -1,12 +1,63 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:projetoint_all/paymentpage.dart';
 import 'package:projetoint_all/widget/button_widget.dart';
 import 'firebase_options.dart';
 import 'variables.dart' as globalVars;
 
-Future <void>Payment() async{
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(CreditCardPage());
+}
+
+class CreditCardPage extends StatelessWidget {
+
+  final Future<FirebaseApp> _fbApp = Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyCnIlwUAq_j3oRpAodah_EsZPF5ZJxT9eg",
+        authDomain: "learn4real-ea66e.firebaseapp.com",
+        projectId: "learn4real-ea66e",
+        storageBucket: "learn4real-ea66e.appspot.com",
+        messagingSenderId: "749916163342",
+        appId: "1:749916163342:web:1edfe88bbac107c1d25b5f"
+      )
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Zona Azul Pagamento',
+      home: FutureBuilder(
+        future: _fbApp,
+        builder: (context, snapshot){
+          if(snapshot.hasError){
+            print('Error: ${snapshot.error.toString()}');
+            return Text("Something Went wrong!");
+          } else if(snapshot.hasData){
+            return CreditCardHome();
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        }
+      ),
+    );
+  }
+}
+
+class CreditCardHome extends StatefulWidget {
+  const CreditCardHome({Key? key}) : super(key: key);
+
+  @override
+  _CreditCardPageState createState() => _CreditCardPageState();
+}
+
+class _CreditCardPageState extends State<CreditCardHome> {
 
   String cardNumber = '';
   String expiryDate= '';
@@ -15,30 +66,6 @@ Future <void>Payment() async{
   String placa = globalVars.placa;
   String doc = globalVars.doc;
   bool isCvvFocused = false;
-
-  var data = {
-    "holder": nomeCartao.toUpperCase(),
-    "validade": expiryDate,
-    "numeroCartao": cardNumber,
-    "cvv": cvvCode,
-    "cpf": doc,
-    "placa": placa,
-  };
-
-  final result = await FirebaseFunctions
-      .instanceFor(region: "southamerica-east1")
-      .httpsCallable('payment')
-      .call(data);
-  setState(() {
-    _result = result.data["message"];
-
-    if(_result == "Sucesso"){
-      Navigator.push(context,
-        MaterialPageRoute(builder: builder)
-      )
-    }
-  });
-
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -104,9 +131,7 @@ Future <void>Payment() async{
                           width: 200,
                           onPressed: () {
                             if(formKey.currentState!.validate()){
-                              print(doc);
-                              print(placa);
-                              print('valido');
+                              Payment();
                             }
                             else{
                               print('Não valido');
@@ -137,5 +162,39 @@ Future <void>Payment() async{
       isCvvFocused = creditCardModel.isCvvFocused;
     });
   }
-}
 
+  Future<void> Payment() async{
+    var data = {
+      "placa": placa,
+      "cardNumber": cardNumber,
+      "validade": expiryDate,
+      "holder": nomeCartao,
+      "cvv": cvvCode,
+      "doc": doc
+    };
+
+    final result = await FirebaseFunctions
+        .instanceFor(region: "southamerica-east1")
+        .httpsCallable("payment")
+        .call(data);
+
+    setState(() {
+      var _result = result.data["message"];
+
+      print(_result);
+
+      if (_result == "Sucesso") {
+        print("Success");
+
+        Navigator.push(
+            context,
+
+            // TODO: Trocar TicketPage para o nome da pagina escrito
+            MaterialPageRoute(builder: (context) => PaymentPage())
+        );
+      } else {
+        print("Falhei");
+      }
+    });
+  }
+}
