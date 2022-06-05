@@ -4,7 +4,6 @@ import 'credit_card_page.dart';
 import 'gerar_qr_code.dart';
 import 'main.dart';
 import 'widget/button_widget.dart';
-import 'variables.dart' as globalVars;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,9 +40,22 @@ class _PaymentHomeState extends State<PaymentHome> {
   final formKey = GlobalKey<FormState>();
   String placa = '';
   String doc = '';
+  String valor = '';
 
   List<String> items = ['1h - R\$2,10', '2h - \$4,20'];
   String selecteditems = '1h - R\$2,10';
+
+  //void setValorFinal () {
+  //  if (valor == '1h - R\$2,10') {
+  //    setState(() {
+//      valorFinal = 1;
+//   });
+  //  } else {
+  //    setState(() {
+//      valorFinal = 2;
+//    });
+//  }
+  //}
 
   @override
   Widget build(BuildContext context) => Container(
@@ -76,35 +88,37 @@ class _PaymentHomeState extends State<PaymentHome> {
             const SizedBox(height: 32),
             Center(
               child: DropdownButtonFormField<String>(
-                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                    borderRadius: BorderRadius.circular(12)
+                  )
                 ),
                 value: selecteditems,
                 items: items
-                    .map((items) =>
-                    DropdownMenuItem<String>(
-                      value: items,
-                      child: Text(items, style: TextStyle(fontSize: 16, color: Colors.black)),
-                    )
-                )
-                    .toList(),
-                onChanged: (items) => setState(() => selecteditems = items!),
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selecteditems = newValue!;
+                  });
+                },
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
               child: BtnGradient(
                 width: 200,
                 onPressed: () {
                   final isValid = formKey.currentState!.validate();
                   if (isValid) {
                     formKey.currentState!.save();
-
-                    globalVars.placa = placa;
-                    globalVars.doc = doc;
 
                     final message = 'placa: $placa\ndoc: $doc';
                     final snackBar = SnackBar(
@@ -113,7 +127,6 @@ class _PaymentHomeState extends State<PaymentHome> {
                         style: TextStyle(fontSize: 20),
                       ),
                     );
-
                     Navigator.push(
                         context, MaterialPageRoute(builder: (context) => QrCodePage())
                     );
@@ -144,8 +157,9 @@ class _PaymentHomeState extends State<PaymentHome> {
                       ),
                       backgroundColor: Colors.green,
                     );
+                    int valorFinal = int.parse(selecteditems[0]);
                     Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => CreditCardPage())
+                        context, MaterialPageRoute(builder: (context) => CreditCardPage(placa : placa, doc : doc, valorFinal : valorFinal))
                     );
                   }
                 },
@@ -165,6 +179,9 @@ class _PaymentHomeState extends State<PaymentHome> {
 
 
   Widget buildPlaca() => TextFormField(
+    onChanged: (text){
+      placa = text;
+    },
     decoration: const InputDecoration(
       labelText: 'Placa',
       labelStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -187,6 +204,9 @@ class _PaymentHomeState extends State<PaymentHome> {
   );
 
   Widget buildDOC() => TextFormField(
+    onChanged: (text){
+      doc = text;
+    },
     decoration: InputDecoration(
       labelText: 'CPF',
       labelStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

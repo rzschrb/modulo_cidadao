@@ -7,6 +7,8 @@ import 'package:projetoint_all/widget/button_widget.dart';
 import 'firebase_options.dart';
 import 'variables.dart' as globalVars;
 
+import 'main.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -14,15 +16,20 @@ Future<void> main() async {
 }
 
 class CreditCardPage extends StatelessWidget {
+  CreditCardPage({Key? key, required this.placa, required this.doc, required this.valorFinal}) : super(key: key);
+
+  String placa;
+  String doc;
+  int valorFinal;
 
   final Future<FirebaseApp> _fbApp = Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyCnIlwUAq_j3oRpAodah_EsZPF5ZJxT9eg",
-        authDomain: "learn4real-ea66e.firebaseapp.com",
-        projectId: "learn4real-ea66e",
-        storageBucket: "learn4real-ea66e.appspot.com",
-        messagingSenderId: "749916163342",
-        appId: "1:749916163342:web:1edfe88bbac107c1d25b5f"
+          apiKey: "AIzaSyCnIlwUAq_j3oRpAodah_EsZPF5ZJxT9eg",
+          authDomain: "learn4real-ea66e.firebaseapp.com",
+          projectId: "learn4real-ea66e",
+          storageBucket: "learn4real-ea66e.appspot.com",
+          messagingSenderId: "749916163342",
+          appId: "1:749916163342:web:1edfe88bbac107c1d25b5f"
       )
   );
 
@@ -32,29 +39,35 @@ class CreditCardPage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Zona Azul Pagamento',
       home: FutureBuilder(
-        future: _fbApp,
-        builder: (context, snapshot){
-          if(snapshot.hasError){
-            print('Error: ${snapshot.error.toString()}');
-            return Text("Something Went wrong!");
-          } else if(snapshot.hasData){
-            return CreditCardHome();
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+          future: _fbApp,
+          builder: (context, snapshot){
+            if(snapshot.hasError){
+              print('Error: ${snapshot.error.toString()}');
+              return Text("Something Went wrong!");
+            } else if(snapshot.hasData){
+              return CreditCardHome(placa: placa, doc: doc, valorFinal: valorFinal);
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
           }
-        }
       ),
     );
   }
 }
 
 class CreditCardHome extends StatefulWidget {
-  const CreditCardHome({Key? key}) : super(key: key);
+  CreditCardHome({Key? key, required this.placa, required this.doc, required this.valorFinal}) : super(key: key);
+
+  String placa;
+  String doc;
+  int valorFinal;
+
 
   @override
-  _CreditCardPageState createState() => _CreditCardPageState();
+  _CreditCardPageState createState() => _CreditCardPageState(placa, doc, valorFinal);
+
 }
 
 class _CreditCardPageState extends State<CreditCardHome> {
@@ -63,10 +76,15 @@ class _CreditCardPageState extends State<CreditCardHome> {
   String expiryDate= '';
   String nomeCartao = '';
   String cvvCode= '';
-  String placa = globalVars.placa;
-  String doc = globalVars.doc;
   bool isCvvFocused = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  String placa;
+  String doc;
+  int valorFinal;
+
+  _CreditCardPageState(this.placa, this.doc, this.valorFinal);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
