@@ -5,14 +5,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:projetoint_all/paymentpage.dart';
 import 'package:projetoint_all/widget/button_widget.dart';
 import 'firebase_options.dart';
-import 'variables.dart' as globalVars;
 
 import 'main.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(CreditCardPage());
+
 }
 
 class CreditCardPage extends StatelessWidget {
@@ -188,7 +187,8 @@ class _CreditCardPageState extends State<CreditCardHome> {
       "validade": expiryDate,
       "holder": nomeCartao,
       "cvv": cvvCode,
-      "doc": doc
+      "doc": doc,
+      "qtdeHoras": valorFinal,
     };
 
     final result = await FirebaseFunctions
@@ -202,16 +202,28 @@ class _CreditCardPageState extends State<CreditCardHome> {
       print(_result);
 
       if (_result == "Sucesso") {
-        print("Success");
-
-        Navigator.push(
-            context,
-
-            // TODO: Trocar TicketPage para o nome da pagina escrito
-            MaterialPageRoute(builder: (context) => PaymentPage())
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Pagamento feito com sucesso')
+          ),
         );
+        Future.delayed(const Duration(milliseconds: 5000), () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => MyHomePage(title: "Página Inicial"))
+          );
+        });
       } else {
-        print("Falhei");
+        print(_result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Pagamento não efetuado')
+          ),
+        );
+        Future.delayed(const Duration(milliseconds: 5000), () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => MyApp())
+          );
+        });
       }
     });
   }

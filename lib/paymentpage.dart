@@ -45,18 +45,6 @@ class _PaymentHomeState extends State<PaymentHome> {
   List<String> items = ['1h - R\$2,10', '2h - \$4,20'];
   String selecteditems = '1h - R\$2,10';
 
-  //void setValorFinal () {
-  //  if (valor == '1h - R\$2,10') {
-  //    setState(() {
-//      valorFinal = 1;
-//   });
-  //  } else {
-  //    setState(() {
-//      valorFinal = 2;
-//    });
-//  }
-  //}
-
   @override
   Widget build(BuildContext context) => Container(
     decoration: const BoxDecoration(
